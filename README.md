@@ -11,3 +11,6 @@ This is a web scraping project that extracts recipes from the Panlasang Pinoy we
 
 The output of the two scripts is saved as scraped-links.json and scraped-recipes.json.
 The cleaned-recipes.json is the result of final cleaning and filtering of scraped-recipes.json. It is the one used for the initial version of the Palayok Web App. Each recipe view in the web app links to the original recipe on the Panlasang Pinoy website.
+
+![PanlasangPinoy](images/PanlasangPinoy.jpg)
+![Data](images/Data.png)

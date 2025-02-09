@@ -2,6 +2,9 @@ import requests
 import json
 from bs4 import BeautifulSoup
 import re
+import itertools
+
+from torch import cat
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -92,13 +95,45 @@ def scrape_recipe(url):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
-        
         prep_time = get_prep_time(soup)
         cook_time = get_cook_time(soup)
-        ingredients, items = get_ingredients(soup)
         instructions = get_instructions(soup)
+        ingredients, items = get_ingredients(soup)
         
-        return [prep_time, cook_time, ingredients, instructions, items]
+        categories = []
+        tokenize_l1 = []
+        tokenize_l1.extend(item.split() for item in items)
+        tokenize_l2 = list(itertools.chain.from_iterable(tokenize_l1))
+        
+        # Vegetarian
+        if not any(token in tokenize_l2 for token in ["chicken", "beef", "pork", "shrimp", "fish", "seafood", "ox", "lamb", "goat", "turkey", "ham", "bacon", "shrimp", "crab", "lobster", "fish", "oyster", "seafood", "anchioves", "mussles", "squid", "squids", "tuna", "tilapia", "bangus", "clam", "scallops", "salmon"]):
+            categories.append("Vegetarian")
+            
+            # Vegan
+            if not any(token in tokenize_l2 for token in ["egg", "eggs" "milk", "cheese", "butter", "yogurt", "honey", "whey"]):
+                categories.append("Vegan")
+                
+        # Gluten-free
+        if not any(token in tokenize_l2 for token in ["wheat", "flour", "bread", "soy", "pasta", "barley"]):
+            categories.append("Gluten-free")
+        
+        # Seafood-free
+        if not any(token in tokenize_l2 for token in  ["shrimp", "crab", "lobster", "fish", "oyster", "seafood", "anchioves", "mussles", "squid", "squids", "tuna", "tilapia", "bangus", "clam", "scallops", "salmon"]):
+            categories.append("Seafood-free")
+        
+        # Low-carb
+        if not any(token in tokenize_l2 for token in ["pasta", "rice", "bread", "potatoes", "corn", "carrots", "spaghetti"]):
+            categories.append("Low-carb")
+
+        # Low-fat
+        if not any(token in tokenize_l2 for token in ["butter", "cream", "belly", "cheese", "mayonnaise", "avocado", "salmon"]):
+            categories.append("Low-fat")
+        
+        # Sugar-free
+        if not any(token in tokenize_l2 for token in ["sugar", "honey", "maple syrup", "agave", "molasses", "sweetened"]):
+            categories.append("Sugar-free")        
+        
+        return [prep_time, cook_time, ingredients, instructions, items, categories]
     except requests.RequestException as e:
         print(f"Error fetching the recipe: {e}")
         return None, None
@@ -117,6 +152,7 @@ if __name__ == '__main__':
             continue
         
         json_recipes.append({
+            "id": f'R{i:04d}',
             "name": json_links[i][0],
             "image": json_links[i][1],
             "link": json_links[i][2],
@@ -124,9 +160,9 @@ if __name__ == '__main__':
             "cook_time": result[1],
             "ingredients": result[2],
             "instructions": result[3],
-            "ingredient_item": result[4]})
-        
-        print(i)
+            "ingredient_item": result[4],
+            "category": result[5]})
 
+        print(f'R{i:04d}', result[4], result[5])
     with open('scraped-recipes.json', 'w') as file:
         json.dump(json_recipes, file)

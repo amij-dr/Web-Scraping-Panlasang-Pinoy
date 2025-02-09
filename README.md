@@ -1,7 +1,7 @@
 ## Web Scraping Panlasang Pinoy Website using Python for initial version of Palayok Web App
 
 ### Description
-This is a web scraping project that extracts recipes from the Panlasang Pinoy website. The extracted data is used for the initial version of the Palayok Web App, a course work for Application Development course. It provides a platform for users to search for Filipino recipes. The web scraping project is implemented using Python and the BeautifulSoup library.
+This is a web scraping project that extracts recipes from the Panlasang Pinoy website. The extracted data is used for the initial version of the Palayok Web App, a course work for Application Development course. It provides a platform for users to search for Filipino recipes by original Filipino creators. The web scraping project is implemented using Python and the BeautifulSoup library.
 
 ### Process
 1. Extract the links and images of recipes from the Panlasang Pinoy website recipe gallery using links-scrape.py
